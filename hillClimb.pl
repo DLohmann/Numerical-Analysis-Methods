@@ -107,12 +107,8 @@ sub hillClimb {
 	
 	#INDICATE TOLERANCE
 	print "Tolerance: $tol\n";
-	
 
-	#this loop checks if a local min has been found to within a tolerance
-	#while no near point (within tolerance) is lower
-
-	#this loop optimizes each independent variable one by one
+	#this loop optimizes each independent variable one by one, by iterating through all of them
 	for ($i = 0; $i < scalar(@xArr); $i += 1) {
 		print "parameter $i is being optimized: @xArr[0..($i-1)] <$xArr[$i]> @xArr[($i+1)..(scalar(@xArr) - 1)]\n";
 		$h = 1;	#reset the step size every time a new variable is optimized
@@ -130,6 +126,8 @@ sub hillClimb {
 		
 		while (($yVal > $f->(@xLeft, $xCenter + $tol, @xRight)) || ($yVal > $f->(@xLeft, $xCenter - $tol, @xRight))) {
 			#this loop optimizes a single independent variable in 1 dimension.
+			#this loop checks if a local min has been found to within a tolerance, while no near point (within tolerance) is lower
+			
 			
 			@xLeft = @xArr[0..($i-1)];	#All parameters left of parameter being optimized
 			$xCenter = $xArr[$i];	#parameter being optimized

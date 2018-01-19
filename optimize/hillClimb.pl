@@ -1,34 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
 my $debug = 0;
 #$debug += scalar grep ( "-d", @ARGV );
-
-
-
-# This finds the minimum of an equation using a hill climbing method
-
-=begin comment
-sub Average {
-   # get total number of arguments passed.
-   $n = scalar(@_);
-   $sum = 0;
-
-   foreach $item (@_) {
-      $sum += $item;
-   }
-   $average = $sum / $n;
-
-   print "Average for the given numbers : $average\n";
-}
-
-Average(10, 20, 30);
-
-=cut
-
-
-
 
 # initialize hill equation:
 sub f1 {	# f1(x) = (x - 1)^2 + 1 
@@ -87,6 +62,7 @@ sub gradDes {
 #=cut
 }
 
+# This finds the minimum of an equation using a hill climbing method
 #HillClimb algorithm that moves downhill in N dimensions along axial direction of each parameter, until it finds a (local) min. Accurate to within 1h (1 step size)
 sub hillClimbMin {
 	my $h = 1;	#initial step size (might decrease by half later to get a result to within a smaller tolerance)
@@ -235,13 +211,15 @@ sub hillClimbMax {
 my $x0 = -4.5;
 my $x1 = 10.7;
 my $tol = 0.001;
+my @inputs;
+my $val;
 
-#=begin comment
+=begin comment
 print "\n\nMIN FINDING";
 
 print "\n\n3 DIMENSIONAL OPTIMIZATION\n";
-my @inputs = hillClimbMin(\&f2, $tol, $x0, $x1);
-my $val = f2(@inputs);
+@inputs = hillClimbMin(\&f2, $tol, $x0, $x1);
+$val = f2(@inputs);
 print "Min of function f2 (starting at ($x0, $x1), to within tolerance $tol, initial step size = 1) is:\n f(", join(', ', @inputs), ") == $val\n";
 
 print "\n\n2 DIMENSIONAL OPTIMIZATION\n";
@@ -264,9 +242,8 @@ print "Min is:        g2(", join(', ', @parameterList), ") = $outputVal\n";
 
 #$val = gradDes($x0, 1);
 #print "gradDesce: Min of function f (starting at $x0) is: $val \n";
-
 print "\n\nMAX FINDING";
-
+=cut
 print "\n\n3 DIMENSIONAL OPTIMIZATION\n";
 @inputs = hillClimbMax(\&f2, $tol, $x0, $x1);
 $val = f2(@inputs);

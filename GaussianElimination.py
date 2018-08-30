@@ -90,6 +90,7 @@ def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The input
 	#eliminate/exclude linearly dependent (duplicate) rows/columns???
 	#If underdetermined, return error
 	#If overdetermined, get rid of data, then cross-reference with excluded data to check if it agrees
+	#Guarantee that this code never divides by 0, but always checking if an entry is 0 before dividing by it. If it is 0, then find the solution another way
 	
 	#TODO: OPTIMIZATION:
 	#Don't need to multiply by 1 or add by 0 when doing row operations. Can skip this part when doing row operations on elements that are guaranteed to be 1 or 0
@@ -97,6 +98,8 @@ def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The input
 	#Find a faster algorithm than Gaussian Elimination???
 	#When converting from REF to RREF, when 0ing out entries above diagonal by subtracting rows, don't iterate through looking for a row to subtract by, and instead just subtract by the row with a 1 in that column on the diagonal, which is guaranteed to work just as well.
 	
+	#TODO: ORAGNIZE:
+	#Make 2 functions called makeOne(A, rowNum, columnNum) and  makeZero(A, rowNum, columnNum) that do row or column operations on A to make the entry A[rowNum, columnNum] be 1 or 0
 	
 	# Form augmented matrix Ag
 	Ag = [A[rowIndex][0::]+ [b[rowIndex]] for rowIndex in range(len(A[0]))]
@@ -215,8 +218,9 @@ def Gaussian_Elimination_Fuzz_Test (numTrials = 5):
 	
 	#TODO: Test non-square matrices
 	#Test matrices with duplicate vectors (but scaled differently), and with both duplicate row vectors, and duplicate column vectors
+	#Test with numbers outside domain 0 to 1 (what rand-range function gives) to test for floating point rounding errors.
 	
-	
+	numPassed = 0
 	
 	for trialNum in range(numTrials):
 		print ("\n\n\n\nTrial ", trialNum, " beginning!!!\n")
@@ -225,14 +229,16 @@ def Gaussian_Elimination_Fuzz_Test (numTrials = 5):
 		b = [rand.random() for entry in range(sideLength)]
 		x = Gaussian_Elimination (A, b)
 		
-		print ("Trial ", trialNum, " PASSED" if (
-													all(
-														np.allclose(matrix_vector_multiply(A, x), b) for entry in x
-														)
-												) else " FAILED"
-				)
-
-
+		passed = all(
+						np.allclose(
+							matrix_vector_multiply(A, x), b
+						) for entry in x
+					)
+					
+		print ("Trial ", trialNum, " PASSED" if passed else " FAILED")
+		if (passed):
+			numPassed += 1
+	return numPassed
 # Find determinant of a matrix
 #def determinant ():
 
@@ -275,7 +281,9 @@ def main():
 												  2])
 												)
 	
+	#Test a few vectors for linear independence (if the result is a vector of all 0's):
 	
+	#This result should be all 0's, indicating linear independence
 	print ("Solution3 is:", Gaussian_Elimination(
 												[[2, 1, 4],
 												 [2, -1, 2],
@@ -284,8 +292,29 @@ def main():
 												  0,
 												  0])
 												)
+	
+	
+	#This result should be not linearly independent (because of duplicated, scaled up vectors 2*[2, 1] == [4, 2])
+	
+	#SOLUTIONS 4-5 CAUSE DIVIDE BY 0!
+	print ("Solution4 is:", Gaussian_Elimination(
+												[[2, 1],
+												 [4, 2]],
+												 [0,
+												  0])
+												)
+	
+	print ("Solution5 is:", Gaussian_Elimination(
+												[[2, 1, 1],
+												 [4, 2, 5],
+												 [1, 2, 3]],
+												 [0,
+												  0,
+												  0])
+												)
 	'''
-	Gaussian_Elimination_Fuzz_Test()
+	
+	print (Gaussian_Elimination_Fuzz_Test(), " of 5  tests passed")
 	
 	#determinant. Can be used for Cramer's rule
 	return

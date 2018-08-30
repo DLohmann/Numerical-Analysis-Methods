@@ -91,24 +91,26 @@ def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The input
 	#If underdetermined, return error
 	#If overdetermined, get rid of data, then cross-reference with excluded data to check if it agrees
 	#Guarantee that this code never divides by 0, but always checking if an entry is 0 before dividing by it. If it is 0, then find the solution another way
+	#If a row operation results in a row of all 0's, then we know that rows are not linearly independent??? So get rid of the 0 row???
 	
 	#TODO: OPTIMIZATION:
+	#Re-order rows (or even columns?) to get into RREF format more easily
 	#Don't need to multiply by 1 or add by 0 when doing row operations. Can skip this part when doing row operations on elements that are guaranteed to be 1 or 0
 	#Code C/C++, and connect to CPython with C/C++ extension
 	#Find a faster algorithm than Gaussian Elimination???
 	#When converting from REF to RREF, when 0ing out entries above diagonal by subtracting rows, don't iterate through looking for a row to subtract by, and instead just subtract by the row with a 1 in that column on the diagonal, which is guaranteed to work just as well.
 	
-	#TODO: ORAGNIZE:
+	#TODO: ORGANIZE:
 	#Make 2 functions called makeOne(A, rowNum, columnNum) and  makeZero(A, rowNum, columnNum) that do row or column operations on A to make the entry A[rowNum, columnNum] be 1 or 0
 	
-	# Form augmented matrix Ag
-	Ag = [A[rowIndex][0::]+ [b[rowIndex]] for rowIndex in range(len(A[0]))]
+	
+	Ag = [A[rowIndex][0::]+ [b[rowIndex]] for rowIndex in range(len(A[0]))] # Forms augmented matrix Ag
 	print ("Ag = ", Ag)
 	
-	#TODO: Re-order rows (or even columns?) to get into RREF format more easily
 	
-	#Perform the actual Gaussian elimination
-	#Move down through the rows, and then right through the columns, to get row echelon form. Ignore the rightmost column of Ag (the solution vector), by iterating over row and column indexes of A instead of Ag (ie "for row in A (not Ag), for column in A (not Ag)")
+	
+	#Performs the actual Gaussian elimination
+	#Moves down through the rows, and then right through the columns, to get row echelon form. Ignore the rightmost column of Ag (the solution vector), by iterating over row and column indexes of A instead of Ag (ie "for row in A (not Ag), for column in A (not Ag)")
 	for columnNum in range(len(A[0])):	# go through each column after going through each row
 		for rowNum in range(len(A)):	# go through each row, from the middle diagonal to bottom.
 			

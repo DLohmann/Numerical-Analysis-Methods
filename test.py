@@ -1,5 +1,16 @@
 #!/usr/bin/env python
+'''
+REGEX to replace rowNum+1 with rowNum:
+Find what:
 
+\(?([rR]owNum)\ ?\+\ ?1\)?
+\(?(*[rR]owNum)\ ?\+\ ?1\)?
+
+
+Replace with:
+\1
+
+'''
 
 def vector_dot (c = 1, A = [], B = []):
 	#Dot with a vector

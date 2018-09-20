@@ -102,6 +102,7 @@ def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The input
 	
 	#TODO: ORGANIZE:
 	#Make 2 functions called makeOne(A, rowNum, columnNum) and  makeZero(A, rowNum, columnNum) that do row or column operations on A to make the entry A[rowNum, columnNum] be 1 or 0
+	#Add symbolic solve functionality??? Would be hard, since we don't know whether we can divide y a variable "entry" unless we know that "entry" is NOT 0. Maybe there could be an option for the user to specify that a variable is definitely not 0, so program assumes it is not???
 	
 	
 	Ag = [A[rowIndex][0::]+ [b[rowIndex]] for rowIndex in range(len(A[0]))] # Forms augmented matrix Ag
@@ -214,19 +215,22 @@ def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The input
 	X = [row[-1] for row in Ag]	# x is the rightmost column of Ag
 	print ("X = ", X)
 	return X
+	
 
-def Gaussian_Elimination_Fuzz_Test (numTrials = 5):
+
+def Gaussian_Elimination_Fuzz_Test_Reals (numTrials = 5):
 	rand.seed(0)
 	
 	#TODO: Test non-square matrices
-	#Test matrices with duplicate vectors (but scaled differently), and with both duplicate row vectors, and duplicate column vectors
+	#Test matrices with duplicate vectors (but scaled differently), and with both duplicate row vectors, and duplicate column vectors. Test with vectors that are linearly dependent
 	#Test with numbers outside domain 0 to 1 (what rand-range function gives) to test for floating point rounding errors.
+	#Test matrices with only integers. This increases the chances that some entries are 0, which will test for dividing by 0. This ensures that 0 entries won't mess up
 	
 	numPassed = 0
 	
 	for trialNum in range(numTrials):
 		print ("\n\n\n\nTrial ", trialNum, " beginning!!!\n")
-		sideLength = rand.randrange(2, 5)
+		sideLength = rand.randrange(2, 5)	# test square matrices with sideLengthths from 2 - 5 (4 - 25 entries)
 		A = [[rand.random() for columnNum in range(sideLength)] for rowNum in range (sideLength)]
 		b = [rand.random() for entry in range(sideLength)]
 		x = Gaussian_Elimination (A, b)

@@ -92,32 +92,11 @@ void sieve (long long int numPrimesToFind, unsigned long long int * primes) {
 		
 		// Sieve of Eratosthenes check:
 		unsigned long long int upperBound = squareRoot(candidate);
-
+		//unsigned long long int upperBound = (unsigned long long int ) ciel(sqrt(candidate));
 		//printf ("Square root is: %llu\n", upperBound);
 		//return;
 
-
-
-		i = 1;
-
-
 		// This function checks candidate against all primes in prime array less than sqrt (candidate), but does so using multiplication instead of sqrt. This is to save computations, but means that the multiplication must be done at each iteration of this loop
-		/*
-		do {
-
-		} while ();
-		*/
-
-		// This function checks candidate against all primes in prime array less than sqrt (candidate)
-		/*
-		i = 1;
-		unsigned long long int upperBound = (unsigned long long int ) ciel(sqrt(candidate));
-		unsigned long long int
-		do {
-
-			i++;
-		} while ( < upperBound);
-		*/
 
 		// This loop just checks candidate against all primes currently found in prime array
 		//*

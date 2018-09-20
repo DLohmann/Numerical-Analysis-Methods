@@ -112,7 +112,7 @@ void sieve (long long int numPrimesToFind, unsigned long long int * primes) {
 			// Found a prime not in primes[]
 			primes[i] = candidate;
 			numFound++;
-			printf ("primes[%lli] == %llu\n", i, candidate);
+			//printf ("primes[%lli] == %llu\n", i, candidate);
 		}
 		//*/
 

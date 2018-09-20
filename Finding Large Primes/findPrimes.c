@@ -2,10 +2,11 @@
 #include <sys/time.h>
 //#include <math.h>	// has sqrt
 //#include <tgmath.h>	// has sqrtl for long double square root
-//#include <pthreads.h> // has multi-threading in C
+#include <pthread.h> // has multi-threading in C
 #include <time.h> // has clock () function for timestamp. Has clock_t, clock, CLOCKS_PER_SEC
+
 #define numTimeStamps 3	// The amount of benchmarking timestamps in the program
-#defint numThreads 2	// The amount of CPU threads used to calculate primes
+#define numThreads 2	// The amount of CPU threads used to calculate primes
 /*
 * This program is a consecutive prime number finder. It finds all consecutive prime numbers from 2 to N and outputs them in order, as quickly as possible, using the fastest algorithms known to man (or woman)
 *
@@ -16,6 +17,15 @@ unsigned long long int squareRoot (unsigned long long int);
 unsigned long long int * primeArr;	// array that holds the primes
 long long int numFound;	// Amount of primes found so far
 clock_t timeStamps [numTimeStamps];	// list of timeStamps. Used to benchmark this code
+
+// Global variables for threads that check if a given number is prime by dividing that candidate number by increasing primes.
+// Each thread's thread ID corresponds to the index in these arrays where that thread's value is stored.
+// These global variables are used for threads to check where other threads are in their candidate-prime number comparisons.
+pthread_t prime_check_threads [numThreads];	          // Threads that check if a candidate is prime
+unsigned long long int prime_candidates [numThreads]; // Stores value of whichever candidate the given thread is currently checking if it is a prime
+long long int prime_index [numThreads];               // Stores the index of the prime in primeArr that the given thread is currently checking the candidate against, to see if the candidate is a multiple of that prime
+
+
 
 int main (int argc, int ** argv) {
 	timeStamps[0] = clock(); // Record when the program began. Record start time
@@ -34,8 +44,8 @@ int main (int argc, int ** argv) {
 	}
 
 	if (numPrimesToFind < 0) {
-		printf("The amount of primes to find must be positive (%llu entered)\n", numPrimesToFind);
-		return 1;
+		printf("The amount of primes to find must be positive (%lli entered)\n", (long long int)numPrimesToFind);
+		return -1;
 	}
 
 	//printf("Finding %llu primes\n", numPrimesToFind);
@@ -63,6 +73,15 @@ int main (int argc, int ** argv) {
 	return 0;
 }
 
+// Used for each thread to check if a number is prime
+void * checkIsPrime_thread (void * thread_ID, unsigned long long int candidate) {
+	
+	// Setting a prime in prime array should be atomic. A thread should lock prime array for writing until it has written the new prime to primes?
+	
+	// Adding 1 to numFound should be atomic, and a thread should lock numFound for reading/writing until numFound is updated (numFound is read, 1 is added to it, and it is stored again).
+	return NULL;
+}
+
 //	ALGORITHM 1: SIEVE OF ERATOSTHENES
 void sieve (long long int numPrimesToFind, unsigned long long int * primes) {
 	long long int i = 0;	// i is the index in primes[] of the next prime to divide "candidate" by (to check if "candidate" is prime)
@@ -82,11 +101,11 @@ void sieve (long long int numPrimesToFind, unsigned long long int * primes) {
 
 	// When code gets here, numPrimesToFind >= numFound, and i == numFound
 	unsigned long long int candidate = primes[numFound-1] + 2;	// Should be +1 if we are not skipping even numbers// check the number after the last known prime
-
+	timeStamps[1] = clock(); // record how long it took to get to code where threads are created
 	do {
 		// CHECK IF "candidate" IS PRIME
 
-		// TRIVIAL PRIME CHECKS:
+		// TODO: TRIVIAL PRIME CHECKS:
 		// ie: is the last bit 0? Do the last few bits guarantee that "candidate" is not prime?
 		// ... insert trivial checks here ...
 		
@@ -109,7 +128,7 @@ void sieve (long long int numPrimesToFind, unsigned long long int * primes) {
 		//if (i == upperBound) {
 			// Found a prime not in primes[]
 			primes[numFound] = candidate;
-			printf ("primes[%lli] == %llu\n", numFound, candidate);
+			//printf ("primes[%lli] == %llu\n", numFound, candidate);
 			numFound++;
 		//}
 		//*/
@@ -123,20 +142,6 @@ void sieve (long long int numPrimesToFind, unsigned long long int * primes) {
 
 }
 
-//TODO: Put integer square root code in a separate file
-
-// MORE OPTIMIZATIONS TO DO:
-// 1. Use multiple threads, and correctly use synchronization primitives for this (potential employers will love this).
-// 2. When "square" is really big, we don't need to re-calculate the square root each time, because in integer math, roundDown(sqrt(big number)) == roundDown(sqrt(bigNumber + 1)).
-//    So we could just check if the square root will be the same (with 1 multiplication), instead of re-calculating it.
-// 3. Find a smarter way to pick the initial guess for Newton's method.
-// 4. Find other, faster ways to check if a number is prime, which may filter out numbers that are obviusly not prime. Maybe this could involve checking certain bits?
-// 5. Make each CPU thread check multiple prime candidates. Have a preprocessor macro for "Prime_Candidates_Per_Thread" to store the number of prime candidates that each CPU thread 
-//    checks as it travels up the array of prime numbers. The benefit of checking multiple candidates on each prime array traversal is that those array indexes in primes[] will 
-//    still be in the CPU cache when they are used to compare the next candidate. So instead of accessing a in index for only 1 prime candidate, and then not needing that index until
-//    the next candidate comes, we can test several prime candidates against the same prime number at the same time. This can also make use of SSE instructions for Intel processors.
-
-
 // Integer Square root. What it does: Finds the square root of an integer "square," rounded down to the nearest integer. Uses a form of Newton's method, where Pn+1 = (Pn + square/Pn)/2. quadratic convergence.
 unsigned long long int squareRoot (unsigned long long int square) {
 	//printf ("\n\nFinding the integer square root of: %llu\n", square);
@@ -148,7 +153,7 @@ unsigned long long int squareRoot (unsigned long long int square) {
 	long long int i = 0;
 	
 	
-	// Problem: When taking the square root of an integer "square," using the integer data type, there is not enough precision for Newton's method to converge.
+	// Strategy: When taking the square root of an integer "square," using the integer data type, there is not enough precision for Newton's method to converge.
 	// This is because any integer data type is only accurate to within 1 integer. Any digits after the decimal point are cut off (mathematically same as setting to 0, round down to int).
 	// This makes Newton's method (using only integers) not convergent for small numbers, because the approximation will not be accurate enough.
 	// For example, if you try to take the square root of 8, using Newton's method [which is P(n+1) = (Pn + square/Pn)/2] but using only integer types, then the result will be as such:

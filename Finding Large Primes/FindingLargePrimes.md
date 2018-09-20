@@ -1,11 +1,11 @@
-#Finding Large Primes
+# Finding Large Primes
 
 This folder is dedicated to finding large primes.
 
-##Stuff To Do: 
+## Stuff To Do: 
 -----------------------------------------
 
- ###ORGANIZATION:
+### ORGANIZATION:
  1. Put integer square root code in a separate file.
  2. Put findPrimes() in a separate file, and make it a C library that can be pre-complied and used with the Makefile.
  3. Use CMake to generate makefiles.
@@ -16,7 +16,7 @@ This folder is dedicated to finding large primes.
  5. Create a man page for this file's documentation.
  6. Make this program callable from Python with Python.h, using the CPython Python interpreter.
 
- ###OPTIMIZATION:
+### OPTIMIZATION:
  1. Use multiple threads, and correctly use synchronization primitives for this (potential employers will love this).
  2. When "square" is really big, we don't need to re-calculate the square root each time, because in integer math, roundDown(sqrt(big number)) == roundDown(sqrt(bigNumber + 1)).
     So we could just check if the square root will be the same (with 1 multiplication), instead of re-calculating it.

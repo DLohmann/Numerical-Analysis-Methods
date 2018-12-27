@@ -71,17 +71,23 @@ void thread_reverse (int thread_id, int * arr, int length) {
 */
 
 
-void thread_reverse (int thread_id, int * arr, int length, int startIndex, int endIndex) {
-	for (int i = startIndex; i <= endIndex; i++) {
+void thread_reverse (int * arr, int length, int startIndex, int endIndex) {
+	#ifdef debug_reversal
+		printf("thread_reverse called from index %d to %d\n", startIndex, endIndex);
+	#endif
+	for (int i = startIndex; i < endIndex; i++) {
+		#ifdef debug_reversal
+			printf ("\tswapping %d and %d\n", arr[i], arr[length - 1 - i] );
+		#endif
 		int temp = arr[i];
 		arr[i] = arr[length - 1 - i];
 		arr[length - 1 - i] = temp;
 	}
 }
 
-void helloWorld () {
-	printf("Hello World!\n");
-}
+//void helloWorld () {
+//	printf("Hello World!\n");
+//}
 
 // [0, 1, 2, ..., N/4, ..., N/2, ..., 3*N/4, ..., N-2, N-1], length = N
 //  ^leftPtr      ^leftMidPtr
@@ -103,13 +109,21 @@ int multithreaded_reversal (int * arr, int length) {
 		// 3rd version of thread_reverse
 		int startIndex =  i    * reverseChunkSize;
 		int endIndex   = (i+1) * reverseChunkSize;
-		reversing_threads[i] = std::thread(helloWorld);
-		//reversing_threads[i] = std::thread(thread_reverse, i, arr, length, startIndex, endIndex);
+		//reversing_threads[i] = std::thread(helloWorld);
+		#ifdef debug_reversal
+			printf ("Thread %d created\n", i);
+		#endif
+		reversing_threads[i] = std::thread(thread_reverse, arr, length, startIndex, endIndex);
 		
 	}
 	
 	// TODO: Reverse all threads in the middle of the array (if the array is not a multiple of 2*200, then there will be some (less than 200) unreversed elements here)
-
+	int startIndex =  numThreads * reverseChunkSize;
+	int endIndex   = length/2;
+	#ifdef debug_reversal
+		printf ("Main thread reversing middle of array\n");
+	#endif
+	thread_reverse(arr, length, startIndex, endIndex);
 
 	//Join the main thread to all the reversing threads
 	for (int i = 0; i < numThreads; i++) {

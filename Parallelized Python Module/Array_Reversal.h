@@ -91,16 +91,29 @@ void thread_reverse (int * arr, int length, int startIndex, int endIndex) {
 
 // [0, 1, 2, ..., N/4, ..., N/2, ..., 3*N/4, ..., N-2, N-1], length = N
 //  ^leftPtr      ^leftMidPtr
+
+// The number of elements that each thread will reverse. Ie, if N = 200, and the array length is 800, then 2 threads will be created. The first will reverse elements 0-199. The second will reverse elements 200-399.
+int N = 50;
+
 int multithreaded_reversal (int * arr, int length) {
 	
 	// For every 200 elements, allocate a thread to reverse them. 
 	// Complexity TODO: Limit this to at most 4 threads?
 	// Optimization TODO: Find the critical number of elements N, so that for every N elements in the array, a new thread should be allocated.
-	int numThreads = 2;	//length/200;
-	std::thread reversing_threads [2];
+	int numThreads; // Number of additional threads created (does not include main thread)
+	int reverseChunkSize;
+	if (length < N) {
+		numThreads = 0;	// If the length is less than N (the critical number to begin a new thread), then just do it all in the main thread.
+		reverseChunkSize = 0;
+	} else {
+		numThreads = length/N;
+		reverseChunkSize = length / (2*numThreads); // Each thread gets an equal amount of elements to reverse.
+	}
+	printf ("\t Threads used: %d\n", numThreads +1);
+	std::thread reversing_threads [numThreads];
 
 	// Create and set each thread
-	int reverseChunkSize = length / (2*numThreads); // Each thread gets an equal amount of elements to reverse. 
+	
 	for (int i = 0; i < numThreads; i++) {
 		// 2nd version of thread_reverse
 		//reversing_threads[i] = thread(thread_reverse, i, arr, length);

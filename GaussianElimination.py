@@ -74,10 +74,10 @@ def matrix_vector_multiply (A, b):
 	'''
 	return x
 	
-
-def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The inputs are A, a matrix, and b, a vector. Solves for, and returns x, a vector
-	print ("Performing Gaussian Elimination")
-	print ("A = ", A, ", b = ", b)
+#TODO: Make this run silently unless "verbose" flag is set
+def Gaussian_Elimination (A, b, verbose = False):	# Solves problems of the form Ax = b. The inputs are A, a matrix, and b, a vector. Solves for, and returns x, a vector
+	# print ("Performing Gaussian Elimination")
+	# print ("A = ", A, ", b = ", b)
 	
 	#Check that A's row length matches b's vector length, so that multiplication is valid.
 	if (len(A[0]) != len(b)):
@@ -217,8 +217,16 @@ def Gaussian_Elimination (A, b):	# Solves problems of the form Ax = b. The input
 	return X
 	
 
-
-def Gaussian_Elimination_Fuzz_Test_Reals (numTrials = 5):
+def Gaussian_Elimination_Test (A, b):
+	x = Gaussian_Elimination (A, b)
+	passed = all(
+					np.allclose(
+						matrix_vector_multiply(A, x), b
+					) for entry in x
+				)
+	return passed
+	
+def Gaussian_Elimination_Fuzz_Test (numTrials = 5):
 	rand.seed(0)
 	
 	#TODO: Test non-square matrices
@@ -226,25 +234,41 @@ def Gaussian_Elimination_Fuzz_Test_Reals (numTrials = 5):
 	#Test with numbers outside domain 0 to 1 (what rand-range function gives) to test for floating point rounding errors.
 	#Test matrices with only integers. This increases the chances that some entries are 0, which will test for dividing by 0. This ensures that 0 entries won't mess up
 	
-	numPassed = 0
 	
+	
+	# Testing real numbers
+	numPassed = 0
+	print ("---------- Testing with REAL numbers from 0 to 1--------------------")
 	for trialNum in range(numTrials):
 		print ("\n\n\n\nTrial ", trialNum, " beginning!!!\n")
 		sideLength = rand.randrange(2, 5)	# test square matrices with sideLengthths from 2 - 5 (4 - 25 entries)
 		A = [[rand.random() for columnNum in range(sideLength)] for rowNum in range (sideLength)]
 		b = [rand.random() for entry in range(sideLength)]
-		x = Gaussian_Elimination (A, b)
 		
-		passed = all(
-						np.allclose(
-							matrix_vector_multiply(A, x), b
-						) for entry in x
-					)
-					
+		passed = Gaussian_Elimination_Test (A, b)
+		
 		print ("Trial ", trialNum, " PASSED" if passed else " FAILED")
 		if (passed):
 			numPassed += 1
-	return numPassed
+		print (numPassed, " of ", numTrials, " tests in REAL numbers [0, 1] passed.")
+	
+	# Testing integers
+	numPassed = 0
+	print ("---------- Testing with INTEGERS from -10 to 10--------------------")
+	for trialNum in range(numTrials):
+		print ("\n\n\n\nTrial ", trialNum, " beginning!!!\n")
+		sideLength = rand.randrange(2, 5)	# test square matrices with sideLengthths from 2 - 5 (4 - 25 entries)
+		A = [[rand.randint(-10, 10) for columnNum in range(sideLength)] for rowNum in range (sideLength)]
+		b = [rand.randint(-10, 10) for entry in range(sideLength)]
+		
+		passed = Gaussian_Elimination_Test (A, b)
+		
+		print ("Trial ", trialNum, " PASSED" if passed else " FAILED")
+		if (passed):
+			numPassed += 1
+		print (numPassed, " of ", numTrials, " tests in integers [-10, 10] passed.")
+		
+	#return numPassed
 # Find determinant of a matrix
 #def determinant ():
 
@@ -320,7 +344,8 @@ def main():
 												)
 	'''
 	
-	print (Gaussian_Elimination_Fuzz_Test(), " of 5  tests passed")
+	Gaussian_Elimination_Fuzz_Test()
+	
 	
 	#determinant. Can be used for Cramer's rule
 	return
